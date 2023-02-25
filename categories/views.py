@@ -22,8 +22,11 @@ def categories(request):
         )
 
         if serializer.is_valid():
+            new_category = serializer.save()
             return Response(
-                {"created": True},
+                CategorySerializer(
+                    new_category
+                ).data,
             )
         else:
             return Response(serializer.errors)
