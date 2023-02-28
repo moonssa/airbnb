@@ -24,4 +24,8 @@ urlpatterns = [
         "api/v1/categories/",
         include("categories.urls"),
     ),
+    path(
+        "api/v1/experiences/",
+        include("experiences.urls"),
+    ),
 ]
