@@ -3,6 +3,7 @@ from . import views
 
 # config/urls.py에서 rooms url 확인 가능
 urlpatterns = [
+    path("", views.Rooms.as_view()),
     path("amenities/", views.Amenities.as_view()),
     path(
         "amenities/<int:pk>",
