@@ -1,0 +1,50 @@
+{
+    "name": "House Created with D",
+    "country": "France",
+    "city": "Chérence",
+    "price": 320000,
+    "rooms": 3,
+    "toilets": 2,
+    "category": 1,
+    "description": "2 guests1 bedroom1 bed1 private bath",
+    "address": "Chérence, Île-de-France, France",
+    "pet_friendly": true,
+    "kind": "entire_place"
+}
+
+
+
+{
+    "id": 1,
+    "owner": {
+        "name": "mk",
+        "avatar": null,
+        "username": "tester"
+    },
+    "amenities": [
+        {
+            "name": "Cooking basics",
+            "description": "Pots and pans, oil, salt and pepper"
+        },
+        {
+            "name": "Wifi",
+            "description": "BBang BBang Speedy"
+        }
+    ],
+    "category": {
+        "name": "Tiny  Moon Homes",
+        "kind": "rooms"
+    },
+    "created_at": "2023-02-10T07:36:04.420605+09:00",
+    "updated_at": "2023-02-13T11:04:59.243249+09:00",
+    "name": "Artist stone hotel",
+    "country": "France",
+    "city": "Chérence",
+    "price": 1200,
+    "rooms": 1,
+    "toilets": 1,
+    "description": "2 guests1 bedroom1 bed1 private bath",
+    "address": "Chérence, Île-de-France, France",
+    "pet_friendly": true,
+    "kind": "entire_place"
+}

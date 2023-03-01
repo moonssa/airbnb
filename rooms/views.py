@@ -6,8 +6,10 @@ from rest_framework.response import Response
 from rest_framework.exceptions import (
     NotFound,
     NotAuthenticated,
+    ParseError,
 )
 from .models import Amenity, Room
+from categories.models import Category
 from .serializers import (
     RoomDetailSerializer,
     RoomListSerializer,
@@ -87,15 +89,41 @@ class Rooms(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        print(dir(request.user))
+        # print(dir(request.user))
         if request.user.is_authenticated:
 
             serializer = RoomDetailSerializer(
                 data=request.data
             )
             if serializer.is_valid():
+                print(
+                    "*** requested Data",
+                    request.data,
+                )
+                category_pk = request.data.get(
+                    "category"
+                )
+                if not category_pk:
+                    raise ParseError
+
+                try:
+                    category = (
+                        Category.objects.get(
+                            pk=category_pk
+                        )
+                    )
+                    if (
+                        category.kind
+                        == Category.CategoryKindChoices.EXPERIENCES
+                    ):
+                        raise ParseError
+
+                except Category.DoesNotExist:
+                    raise ParseError
+
                 room = serializer.save(
-                    owner=request.user
+                    owner=request.user,
+                    category=category,
                 )
                 serializer = RoomDetailSerializer(
                     room
