@@ -1,4 +1,5 @@
 from rest_framework.views import APIView
+from django.db import transaction
 from rest_framework.status import (
     HTTP_204_NO_CONTENT,
 )
@@ -29,14 +30,10 @@ class Amenities(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = AmenitySerializer(
-            data=request.data
-        )
+        serializer = AmenitySerializer(data=request.data)
         if serializer.is_valid():
             amenity = serializer.save()
-            return Response(
-                AmenitySerializer(amenity).data
-            )
+            return Response(AmenitySerializer(amenity).data)
         else:
             return Response(serializer.errors)
 
@@ -50,9 +47,7 @@ class AmenityDetail(APIView):
 
     def get(self, request, pk):
         return Response(
-            AmenitySerializer(
-                self.get_object(pk)
-            ).data,
+            AmenitySerializer(self.get_object(pk)).data,
         )
 
     def put(self, request, pk):
@@ -64,9 +59,7 @@ class AmenityDetail(APIView):
         )
         if serializer.is_valid():
             return Response(
-                AmenitySerializer(
-                    serializer.save()
-                ).data,
+                AmenitySerializer(serializer.save()).data,
             )
         else:
             return Response(serializer.errors)
@@ -74,9 +67,7 @@ class AmenityDetail(APIView):
     def delete(self, request, pk):
         amenity = self.get_object(pk)
         amenity.delete()
-        return Response(
-            status=HTTP_204_NO_CONTENT
-        )
+        return Response(status=HTTP_204_NO_CONTENT)
 
 
 class Rooms(APIView):
@@ -92,43 +83,43 @@ class Rooms(APIView):
         # print(dir(request.user))
         if request.user.is_authenticated:
 
-            serializer = RoomDetailSerializer(
-                data=request.data
-            )
+            serializer = RoomDetailSerializer(data=request.data)
             if serializer.is_valid():
                 print(
                     "*** requested Data",
                     request.data,
                 )
-                category_pk = request.data.get(
-                    "category"
-                )
+                category_pk = request.data.get("category")
                 if not category_pk:
-                    raise ParseError
+                    raise ParseError("Category is required")
 
                 try:
-                    category = (
-                        Category.objects.get(
-                            pk=category_pk
-                        )
-                    )
-                    if (
-                        category.kind
-                        == Category.CategoryKindChoices.EXPERIENCES
-                    ):
-                        raise ParseError
+                    category = Category.objects.get(pk=category_pk)
+                    if category.kind == Category.CategoryKindChoices.EXPERIENCES:
+                        raise ParseError("The category  kind should be 'rooms'")
 
                 except Category.DoesNotExist:
-                    raise ParseError
+                    raise ParseError("Category Not found")
+                print(request.data.get("amenities"))
 
-                room = serializer.save(
-                    owner=request.user,
-                    category=category,
-                )
-                serializer = RoomDetailSerializer(
-                    room
-                )
-                return Response(serializer.data)
+                try:
+                    with transaction.atomic():
+
+                        room = serializer.save(
+                            owner=request.user,
+                            category=category,
+                        )
+
+                        amenities = request.data.get("amenities")
+                        for amenity_pk in amenities:
+
+                            amenity = Amenity.objects.get(pk=amenity_pk)
+                            room.amenities.add(amenity)
+
+                        serializer = RoomDetailSerializer(room)
+                        return Response(serializer.data)
+                except Exception:
+                    raise ParseError("Ammenity not found")
             else:
                 return Response(serializer.errors)
         else:
@@ -144,6 +135,4 @@ class RoomDetail(APIView):
 
     def get(self, request, pk):
         room = self.get_object(pk)
-        return Response(
-            RoomDetailSerializer(room).data
-        )
+        return Response(RoomDetailSerializer(room).data)
