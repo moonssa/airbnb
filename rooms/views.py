@@ -8,6 +8,7 @@ from rest_framework.exceptions import (
     NotFound,
     NotAuthenticated,
     ParseError,
+    PermissionDenied,
 )
 from .models import Amenity, Room
 from categories.models import Category
@@ -136,3 +137,14 @@ class RoomDetail(APIView):
     def get(self, request, pk):
         room = self.get_object(pk)
         return Response(RoomDetailSerializer(room).data)
+
+    def delete(self, request, pk):
+        room = self.get_object(pk)
+        if not request.user.is_authenticated:
+            raise NotAuthenticated
+
+        if room.owner != request.user:
+            raise PermissionDenied
+
+        room.delete()
+        return Response(status=HTTP_204_NO_CONTENT)
