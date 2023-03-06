@@ -148,3 +148,25 @@ class RoomDetail(APIView):
 
         room.delete()
         return Response(status=HTTP_204_NO_CONTENT)
+
+    def put(self, request, pk):
+        room = self.get_object(pk)
+
+        if not request.user.is_authenticated:
+            raise NotAuthenticated
+
+        if room.owner != request.user:
+            raise PermissionDenied
+
+        serializer = RoomDetailSerializer(
+            room,
+            data=request.data,
+            partial=True,
+        )
+
+        if serializer.is_valid():
+            return Response(
+                RoomDetailSerializer(serializer.save()).data,
+            )
+        else:
+            Response(serializer.errors)
