@@ -6,6 +6,7 @@ from users.serializers import TinyUserSerializer
 from categories.serializers import (
     CategorySerializer,
 )
+from reviews.serializers import ReviewSerializer
 
 
 class AmenitySerializer(serializers.ModelSerializer):
@@ -25,6 +26,12 @@ class RoomDetailSerializer(serializers.ModelSerializer):
     # customize serial field
     rating = serializers.SerializerMethodField()
     is_owner = serializers.SerializerMethodField()
+
+    # 역접근자 이용
+    reviews = ReviewSerializer(
+        many=True,
+        read_only=True,
+    )
 
     class Meta:
         model = Room
