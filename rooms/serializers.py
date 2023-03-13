@@ -27,12 +27,6 @@ class RoomDetailSerializer(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField()
     is_owner = serializers.SerializerMethodField()
 
-    # 역접근자 이용
-    reviews = ReviewSerializer(
-        many=True,
-        read_only=True,
-    )
-
     class Meta:
         model = Room
         fields = "__all__"
