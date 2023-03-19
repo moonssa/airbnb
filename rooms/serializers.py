@@ -8,6 +8,7 @@ from categories.serializers import (
 )
 from reviews.serializers import ReviewSerializer
 from medias.serializers import PhotoSerializer
+from wishlists.models import Wishlist
 
 
 class AmenitySerializer(serializers.ModelSerializer):
@@ -27,6 +28,8 @@ class RoomDetailSerializer(serializers.ModelSerializer):
     # customize serial field
     rating = serializers.SerializerMethodField()
     is_owner = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
+
     photos = PhotoSerializer(many=True, read_only=True)
 
     class Meta:
@@ -40,6 +43,15 @@ class RoomDetailSerializer(serializers.ModelSerializer):
         request = self.context["request"]
         return room.owner == request.user
 
+    def get_is_liked(self, room):
+        request = self.context["request"]
+
+        # user가 만든 위시리스트중에서 찾는 룸아이디가 들어있는 룸리스트를 포함힌 위시리스트를 찾는다.
+        return Wishlist.objects.filter(
+            user=request.user,
+            rooms__pk=room.pk,
+        ).exists()
+
     # def create(self, validated_data):
     #     print("-----------", validated_data)
     #     return
@@ -48,6 +60,7 @@ class RoomDetailSerializer(serializers.ModelSerializer):
 class RoomListSerializer(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField()
     is_owner = serializers.SerializerMethodField()
+
     photos = PhotoSerializer(many=True, read_only=True)
 
     class Meta:
